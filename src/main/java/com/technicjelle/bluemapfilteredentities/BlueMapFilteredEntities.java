@@ -2,6 +2,7 @@ package com.technicjelle.bluemapfilteredentities;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.technicjelle.UpdateChecker;
+import com.technicjelle.BMCopy;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
@@ -17,8 +18,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public final class BlueMapFilteredEntities extends JavaPlugin {
 	private UpdateChecker updateChecker;
@@ -36,6 +39,13 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 	private final Consumer<BlueMapAPI> onEnableListener = api -> {
 		updateChecker.logUpdateMessage(getLogger());
+		try {
+			BMCopy.jarResourceToWebApp(api, getClassLoader(), "bmfe-marker-animator.js", "bmfe-marker-animator.js", true);
+			getLogger().info("Registered scripts");
+			api.getWebApp().registerScript("assets/bmfe-marker-animator.js");
+		} catch (IOException e) {
+			getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
+		}
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
 			long millisAtStart = System.currentTimeMillis();
 
@@ -82,7 +92,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 							.label(entity.getName())
 							.position(position)
 							.build();
-					markerSet.put(entity.getUniqueId().toString(), marker);
+					markerSet.put("bmfe." + entity.getUniqueId(), marker);
 				}
 			}
 			getLogger().info("Took " + (System.currentTimeMillis() - millisAtStart) + "ms to add entity markers for all worlds.");
