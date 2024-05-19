@@ -27,6 +27,17 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	private UpdateChecker updateChecker;
 
 	@Override
+	public void onLoad() {
+		BlueMapAPI.onEnable(api -> {
+			try {
+				BMCopy.jarResourceToWebApp(api, getClassLoader(), "bmfe-marker-animator.js", "bmfe-marker-animator.js", true);
+			} catch (IOException e) {
+				getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
+			}
+		});
+	}
+
+	@Override
 	public void onEnable() {
 		new Metrics(this, 21976);
 
@@ -39,13 +50,6 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 	private final Consumer<BlueMapAPI> onEnableListener = api -> {
 		updateChecker.logUpdateMessage(getLogger());
-		try {
-			BMCopy.jarResourceToWebApp(api, getClassLoader(), "bmfe-marker-animator.js", "bmfe-marker-animator.js", true);
-			getLogger().info("Registered scripts");
-			api.getWebApp().registerScript("assets/bmfe-marker-animator.js");
-		} catch (IOException e) {
-			getLogger().log(Level.SEVERE, "Failed to copy resources to BlueMap webapp!", e);
-		}
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
 			long millisAtStart = System.currentTimeMillis();
 
