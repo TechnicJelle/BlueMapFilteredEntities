@@ -1,0 +1,6 @@
+name: BlueMapFilteredEntities
+version: '${project.version}'
+main: com.technicjelle.bluemapfilteredentities.BlueMapFilteredEntities
+api-version: '1.13'
+depend:
+  - BlueMap
