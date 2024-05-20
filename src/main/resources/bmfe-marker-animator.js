@@ -1,7 +1,7 @@
 const { PoiMarker, animate, EasingFunctions } = window.BlueMap;
 const original = PoiMarker.prototype.updateFromData;
 PoiMarker.prototype.updateFromData = function (markerData) {
-    if (!(this.data?.id ?? "").startsWith("bmfe.")) {
+    if (!(this.data?.id ?? "").startsWith("bmfe.") || (!this.position.x && !this.position.y && !this.position.z)) {
         return original.call(this, markerData)
     }
     let startPos = {
