@@ -20,11 +20,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public final class BlueMapFilteredEntities extends JavaPlugin {
 	private UpdateChecker updateChecker;
+	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	@Override
 	public void onLoad() {
@@ -50,58 +54,71 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 	private final Consumer<BlueMapAPI> onEnableListener = api -> {
 		updateChecker.logUpdateMessage(getLogger());
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
-			long millisAtStart = System.currentTimeMillis();
-
-			List<World> worlds = getServer().getWorlds();
-			for (World world : worlds) {
-				BlueMapWorld blueMapWorld = api.getWorld(world).orElse(null);
-				if (blueMapWorld == null) {
-					getLogger().warning("Failed to get BlueMapWorld for world: " + world.getName());
-					continue;
-				}
-
-				if (blueMapWorld.getMaps().isEmpty()) continue;
-
-				getLogger().info("Adding markers for world: " + world.getName());
-				MarkerSet markerSet = MarkerSet.builder()
-						.label("Entities")
-						.toggleable(true)
-						.defaultHidden(true)
-						.build();
-
-				for (BlueMapMap map : blueMapWorld.getMaps()) {
-					map.getMarkerSets().put(map.getId() + "_entities", markerSet);
-				}
-
-				List<Entity> entities = world.getEntities();
-				markerSet.getMarkers().clear();
-				for (Entity entity : entities) {
-					if (entity instanceof Player) continue;
-
-					//TODO: Add special data for Item Frames
-					//TODO: Add special data for Armor Stands
-
-//					getLogger().info("Type: " + entity.getType());
-//					getLogger().info("Name: " + entity.getName());
-//					getLogger().info("UUID: " + entity.getUniqueId());
-//					getLogger().info("Spawn Reason: " + entity.getEntitySpawnReason());
-//					getLogger().info("Custom Name: " + getCustomName(entity));
-//					getLogger().info("Location: " + entity.getLocation());
-//					getLogger().info("Scoreboard Tags: " + String.join(", ", entity.getScoreboardTags()));
-//					getLogger().info("------------------------------");
-
-					Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
-					POIMarker marker = POIMarker.builder()
-							.label(entity.getName())
-							.position(position)
-							.build();
-					markerSet.put("bmfe." + entity.getUniqueId(), marker);
-				}
-			}
-			getLogger().info("Took " + (System.currentTimeMillis() - millisAtStart) + "ms to add entity markers for all worlds.");
-		}, 0, 20 * 10);
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> processWorlds(api), 0, 20 * 10);
 	};
+
+	private void processWorlds(BlueMapAPI api) {
+		long millisAtStart = System.currentTimeMillis();
+
+		List<World> worlds = getServer().getWorlds();
+
+		CompletableFuture<Void>[] futures = new CompletableFuture[worlds.size()];
+
+		for (int i = 0; i < worlds.size(); i++) {
+			World world = worlds.get(i);
+			BlueMapWorld blueMapWorld = api.getWorld(world).orElse(null);
+			if (blueMapWorld == null) {
+				getLogger().warning("Failed to get BlueMapWorld for world: " + world.getName());
+				continue;
+			}
+
+			if (blueMapWorld.getMaps().isEmpty()) continue;
+
+			List<Entity> entities = world.getEntities();
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> processEntities(blueMapWorld, entities), executorService);
+			futures[i] = future;
+		}
+
+		CompletableFuture.allOf(futures).thenRun(() ->
+				getLogger().info("Took " + (System.currentTimeMillis() - millisAtStart) + "ms to add entity markers for all worlds."));
+	}
+
+	private void processEntities(BlueMapWorld blueMapWorld, List<Entity> entities) {
+		MarkerSet markerSet = MarkerSet.builder()
+				.label("Entities")
+				.toggleable(true)
+				.defaultHidden(true)
+				.build();
+
+		for (BlueMapMap map : blueMapWorld.getMaps()) {
+			map.getMarkerSets().put(map.getId() + "_entities", markerSet);
+		}
+
+		markerSet.getMarkers().clear();
+
+		for (Entity entity : entities) {
+			if (entity instanceof Player) continue;
+
+			//TODO: Add special data for Item Frames
+			//TODO: Add special data for Armor Stands
+
+//			getLogger().info("Type: " + entity.getType());
+//			getLogger().info("Name: " + entity.getName());
+//			getLogger().info("UUID: " + entity.getUniqueId());
+//			getLogger().info("Spawn Reason: " + entity.getEntitySpawnReason());
+//			getLogger().info("Custom Name: " + getCustomName(entity));
+//			getLogger().info("Location: " + entity.getLocation());
+//			getLogger().info("Scoreboard Tags: " + String.join(", ", entity.getScoreboardTags()));
+//			getLogger().info("------------------------------");
+
+			Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
+			POIMarker marker = POIMarker.builder()
+					.label(entity.getName())
+					.position(position)
+					.build();
+					markerSet.put("bmfe." + entity.getUniqueId(), marker);
+		}
+	}
 
 	@Nullable
 	String getCustomName(Entity entity) {
