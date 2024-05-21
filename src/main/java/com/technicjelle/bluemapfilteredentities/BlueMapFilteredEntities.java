@@ -102,18 +102,25 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			//TODO: Add special data for Item Frames
 			//TODO: Add special data for Armor Stands
 
-//			getLogger().info("Type: " + entity.getType());
-//			getLogger().info("Name: " + entity.getName());
-//			getLogger().info("UUID: " + entity.getUniqueId());
-//			getLogger().info("Spawn Reason: " + entity.getEntitySpawnReason());
-//			getLogger().info("Custom Name: " + getCustomName(entity));
-//			getLogger().info("Location: " + entity.getLocation());
-//			getLogger().info("Scoreboard Tags: " + String.join(", ", entity.getScoreboardTags()));
-//			getLogger().info("------------------------------");
+			String entityInfo;
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.append("Type: ").append(entity.getType());
+				sb.append("\nName: ").append(entity.getName());
+				sb.append("\nUUID: ").append(entity.getUniqueId());
+				sb.append("\nSpawn Reason: ").append(entity.getEntitySpawnReason());
+				sb.append("\nCustom Name: ").append(getCustomName(entity));
+				Location location = entity.getLocation();
+				sb.append("\nLocation: ").append(location.getBlockX()).append(", ").append(location.getBlockY()).append(", ").append(location.getBlockZ()).append(" (").append(location.getWorld().getName()).append(")");
+				sb.append("\nScoreboard Tags: [ ").append(String.join(", ", entity.getScoreboardTags())).append(" ]");
+				entityInfo = sb.toString();
+			}
+//			getLogger().info(entityInfo);
 
 			Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
 			POIMarker marker = POIMarker.builder()
 					.label(entity.getName())
+					.detail(entityInfo.replace("\n", "<br>"))
 					.position(position)
 					.build();
 					markerSet.put("bmfe." + entity.getUniqueId(), marker);
