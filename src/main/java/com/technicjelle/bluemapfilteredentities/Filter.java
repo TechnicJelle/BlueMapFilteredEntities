@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -62,6 +63,10 @@ public class Filter {
 	private String[] scoreboardTags;
 
 	@Nullable
+	@Comment("Sub-filters to exclude entities from the filter")
+	private List<Filter> exclude;
+
+	@Nullable
 	private transient EntityType entityType;
 
 	@Nullable
@@ -72,6 +77,7 @@ public class Filter {
 
 	public boolean checkValidAndInit(Logger logger) {
 		boolean valid = true;
+
 		if (type != null) {
 			try {
 				entityType = EntityType.valueOf(type.strip().toUpperCase(Locale.ROOT));
@@ -126,14 +132,20 @@ public class Filter {
 			valid = false;
 		}
 
+		if (exclude != null) {
+			for (Filter filter : exclude) {
+				if (!filter.checkValidAndInit(logger)) {
+					valid = false;
+				}
+			}
+		}
+
 		return valid;
 	}
 
-
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Filter:\n");
+		StringBuilder sb = new StringBuilder("\n");
 		if (entityType != null) sb.append(" type: ").append(entityType).append("\n");
 		if (name != null) sb.append(" name: ").append(name).append("\n");
 		if (customName != null) sb.append(" customName: ").append(customName).append("\n");
@@ -147,6 +159,13 @@ public class Filter {
 		if (maxY != null) sb.append(" max-y: ").append(maxY).append("\n");
 		if (scoreboardTags != null)
 			sb.append(" scoreboard-tags: [ ").append(String.join(", ", scoreboardTags)).append(" ]\n");
+		if (exclude != null) {
+			sb.append(" exclude:");
+			for (Filter filter : exclude) {
+				sb.append(filter.toString().replace("\n", "\n  "));
+				sb.append("\n   ---");
+			}
+		}
 		return sb.toString().stripTrailing();
 	}
 }
