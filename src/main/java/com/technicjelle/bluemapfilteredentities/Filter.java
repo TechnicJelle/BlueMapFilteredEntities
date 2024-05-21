@@ -126,8 +126,6 @@ public class Filter {
 			valid = false;
 		}
 
-		logger.info(toString());
-
 		return valid;
 	}
 

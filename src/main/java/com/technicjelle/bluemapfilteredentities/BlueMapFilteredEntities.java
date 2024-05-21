@@ -142,6 +142,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					boolean valid = filter.checkValidAndInit(getLogger());
 					if (valid) {
 						filters.add(filter);
+						getLogger().info(filter.toString());
 					}
 				}
 			} catch (Exception e) {
