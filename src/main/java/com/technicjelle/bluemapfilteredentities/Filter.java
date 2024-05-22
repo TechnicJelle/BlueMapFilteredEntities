@@ -148,7 +148,7 @@ public class Filter {
 		StringBuilder sb = new StringBuilder("\n");
 		if (entityType != null) sb.append(" type: ").append(entityType).append("\n");
 		if (name != null) sb.append(" name: ").append(name).append("\n");
-		if (customName != null) sb.append(" customName: ").append(customName).append("\n");
+		if (customName != null) sb.append(" custom-name: ").append(customName).append("\n");
 		if (entityUUID != null) sb.append(" UUID: ").append(entityUUID).append("\n");
 		if (entitySpawnReason != null) sb.append(" spawn-reason: ").append(entitySpawnReason).append("\n");
 		if (minX != null) sb.append(" min-x: ").append(minX).append("\n");
