@@ -178,12 +178,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			}
 			List<Entity> entities = world.getEntities();
 
-			//TODO: Actually filter the entities here
-//			for (Filter filter : filters) {
-//				getLogger().info(filter.print());
-//			}
-
-			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> processEntities(map, entities), executorService);
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> processEntities(map, filters, entities), executorService);
 			futures[i] = future;
 			i++;
 		}
@@ -204,7 +199,17 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 		return null;
 	}
 
-	private void processEntities(BlueMapMap map, List<Entity> entities) {
+	private void processEntities(BlueMapMap map, List<Filter> filters, List<Entity> worldEntities) {
+		List<Entity> filteredEntities = new ArrayList<>();
+		for (Entity entity : worldEntities) {
+			for (Filter filter : filters) {
+				if (filter.matches(entity, getLogger())) {
+					filteredEntities.add(entity);
+					break;
+				}
+			}
+		}
+
 		String key = map.getId() + "_entities";
 		MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(key, id -> MarkerSet.builder()
 				.label("Entities")
@@ -214,7 +219,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 		markerSet.getMarkers().clear();
 
-		for (Entity entity : entities) {
+		for (Entity entity : filteredEntities) {
 			if (entity instanceof Player) continue;
 
 			//TODO: Add special data for Item Frames

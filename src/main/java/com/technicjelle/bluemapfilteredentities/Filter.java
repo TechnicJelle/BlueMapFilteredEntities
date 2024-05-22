@@ -1,5 +1,6 @@
 package com.technicjelle.bluemapfilteredentities;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.jetbrains.annotations.Nullable;
@@ -8,6 +9,7 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,6 +143,26 @@ public class Filter {
 		}
 
 		return valid;
+	}
+
+	public boolean matches(Entity e, Logger logger) {
+		if (entityType != null && e.getType() != entityType) return false;
+		if (name != null && !e.getName().equals(name)) return false;
+		if (customName != null && !Objects.equals(e.getCustomName(), customName)) return false;
+		if (entityUUID != null && !e.getUniqueId().equals(entityUUID)) return false;
+		if (entitySpawnReason != null && e.getEntitySpawnReason().equals(entitySpawnReason)) return false;
+
+		if (minX != null && e.getLocation().getX() < minX) return false;
+		if (maxX != null && e.getLocation().getX() > maxX) return false;
+		if (minZ != null && e.getLocation().getZ() < minZ) return false;
+		if (maxZ != null && e.getLocation().getZ() > maxZ) return false;
+		if (minY != null && e.getLocation().getY() < minY) return false;
+		if (maxY != null && e.getLocation().getY() > maxY) return false;
+
+		//TODO: Implement scoreboard tags
+
+		logger.info("Entity matched: " + e.getType());
+		return true;
 	}
 
 	@Override
