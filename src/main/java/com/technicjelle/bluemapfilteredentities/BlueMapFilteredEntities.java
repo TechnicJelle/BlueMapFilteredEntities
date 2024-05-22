@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 public final class BlueMapFilteredEntities extends JavaPlugin {
 	private static final String CONF_EXT = ".conf";
@@ -66,6 +67,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	private final Consumer<BlueMapAPI> onEnableListener = api -> {
 		updateChecker.logUpdateMessage(getLogger());
 
+		// Copy script & style to webapp
 		try {
 			BMCopy.jarResourceToWebApp(api, getClassLoader(), "bmfe.js", "bmfe.js", true);
 			BMCopy.jarResourceToWebApp(api, getClassLoader(), "bmfe.css", "bmfe.css", true);
@@ -87,6 +89,26 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					getLogger().log(Level.SEVERE, "Failed to copy default config for map " + map.getId(), e);
 				}
 			}
+		}
+
+		// Copy all files in the icon folder to the webapp
+		Path iconFolder = getDataFolder().toPath().resolve("icons");
+		try {
+			Files.createDirectories(iconFolder);
+			try (final Stream<Path> files = Files.walk(iconFolder)) {
+				files.filter(Files::isRegularFile).forEach(path -> {
+					Path relativeToIconFolder = iconFolder.relativize(path);
+					try {
+						BMCopy.fileToWebApp(api, path, "bmfe-icons/" + relativeToIconFolder, true);
+					} catch (IOException e) {
+						getLogger().log(Level.SEVERE, "Failed to copy icon " + path + " to BlueMap webapp!", e);
+					}
+				});
+			} catch (IOException e) {
+				getLogger().log(Level.SEVERE, "Failed to walk icon folder!", e);
+			}
+		} catch (IOException e) {
+			getLogger().log(Level.SEVERE, "Failed to create icon folder!", e);
 		}
 
 		// Load configs
@@ -139,7 +161,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					if (filter == null) {
 						throw new Exception("Filter was null: " + child);
 					}
-					boolean valid = filter.checkValidAndInit(getLogger());
+					boolean valid = filter.checkValidAndInit(getLogger(), api);
 					if (valid) {
 						filters.add(filter);
 						getLogger().info(filter.toString());
@@ -200,10 +222,14 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	}
 
 	private void processEntities(BlueMapMap map, List<Filter> filters, List<Entity> worldEntities) {
+		Map<Entity, String> entityIconMap = new HashMap<>();
 		List<Entity> filteredEntities = new ArrayList<>();
 		for (Entity entity : worldEntities) {
 			for (Filter filter : filters) {
 				if (filter.matches(entity, getLogger())) {
+					if (filter.getIcon() != null) {
+						entityIconMap.put(entity, filter.getIcon());
+					}
 					filteredEntities.add(entity);
 					break;
 				}
@@ -247,6 +273,12 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					.styleClasses("bmfe-entity")
 					.position(position)
 					.build();
+
+			String icon = entityIconMap.get(entity);
+			if (icon != null) {
+				marker.setIcon("assets/bmfe-icons/" + icon, 24, 24); //TODO: Make anchor point configurable
+			}
+
 			markerSet.put("bmfe." + entity.getUniqueId(), marker);
 		}
 	}

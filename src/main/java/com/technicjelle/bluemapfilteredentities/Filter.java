@@ -1,5 +1,6 @@
 package com.technicjelle.bluemapfilteredentities;
 
+import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -7,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -65,6 +67,10 @@ public class Filter {
 	private String[] scoreboardTags;
 
 	@Nullable
+	@Comment("Path to the icon to use for entities that were matched by this filter")
+	private String icon;
+
+	@Nullable
 	@Comment("Sub-filters to exclude entities from the filter")
 	private List<Filter> exclude;
 
@@ -77,7 +83,7 @@ public class Filter {
 	@Nullable
 	private transient CreatureSpawnEvent.SpawnReason entitySpawnReason;
 
-	public boolean checkValidAndInit(Logger logger) {
+	public boolean checkValidAndInit(Logger logger, BlueMapAPI bmApi) {
 		boolean valid = true;
 
 		if (type != null) {
@@ -134,15 +140,29 @@ public class Filter {
 			valid = false;
 		}
 
+		if (icon != null) {
+			if (icon.isBlank()) {
+				logger.log(Level.SEVERE, "Icon defined, but empty");
+				valid = false;
+			} else if (!Files.exists(bmApi.getWebApp().getWebRoot().resolve("assets/bmfe-icons").resolve(icon))) {
+				logger.log(Level.SEVERE, "Icon file does not exist: " + icon);
+				valid = false;
+			}
+		}
+
 		if (exclude != null) {
 			for (Filter filter : exclude) {
-				if (!filter.checkValidAndInit(logger)) {
+				if (!filter.checkValidAndInit(logger, bmApi)) {
 					valid = false;
 				}
 			}
 		}
 
 		return valid;
+	}
+
+	public @Nullable String getIcon() {
+		return icon;
 	}
 
 	public boolean matches(Entity e, Logger logger) {
@@ -181,6 +201,7 @@ public class Filter {
 		if (maxY != null) sb.append(" max-y: ").append(maxY).append("\n");
 		if (scoreboardTags != null)
 			sb.append(" scoreboard-tags: [ ").append(String.join(", ", scoreboardTags)).append(" ]\n");
+		if (icon != null) sb.append(" icon: ").append(icon).append("\n");
 		if (exclude != null) {
 			sb.append(" exclude:");
 			for (Filter filter : exclude) {
