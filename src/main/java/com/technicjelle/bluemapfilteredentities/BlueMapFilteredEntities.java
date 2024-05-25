@@ -1,6 +1,7 @@
 package com.technicjelle.bluemapfilteredentities;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.gson.reflect.TypeToken;
 import com.technicjelle.BMCopy;
 import com.technicjelle.UpdateChecker;
 import de.bluecolored.bluemap.api.BlueMapAPI;
@@ -25,6 +26,7 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,13 +44,13 @@ import java.util.stream.Stream;
 
 public final class BlueMapFilteredEntities extends JavaPlugin {
 	private static final String CONF_EXT = ".conf";
-	private static final String NODE_FILTERS = "filters";
+	private static final String NODE_FILTER_SETS = "filter-sets";
 
 	private UpdateChecker updateChecker;
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	//TODO: Replace String with BlueMapMap when the bmAPI is updated to include the BlueMapMap hashcode:
-	private final Map<String, List<Filter>> trackingMaps = new HashMap<>();
+	private final Map<String, Map<String, FilterSet>> trackingMaps = new HashMap<>();
 
 	@Override
 	public void onLoad() {
@@ -133,9 +135,6 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 			getLogger().info("Loading config for map: " + map.getId());
 
-			List<Filter> filters = new ArrayList<>();
-			trackingMaps.put(mapId, filters);
-
 			HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
 					.defaultOptions(options -> options.implicitInitialization(false))
 					.path(file.toPath()).build();
@@ -153,18 +152,27 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			}
 
 			try {
-				ConfigurationNode filtersNode = root.node(NODE_FILTERS);
-				if (filtersNode.virtual()) throw new Exception("filters property is required");
-				List<? extends ConfigurationNode> children = filtersNode.childrenList();
-				for (ConfigurationNode child : children) {
-					Filter filter = child.get(Filter.class);
-					if (filter == null) {
-						throw new Exception("Filter was null: " + child);
+				ConfigurationNode filtersNode = root.node(NODE_FILTER_SETS);
+				if (filtersNode.virtual()) throw new Exception("filter-sets property is required");
+				Type filterSetType = new TypeToken<Map<String, FilterSet>>() {}.getType();
+				Object filterSetMapMaybe = filtersNode.get(filterSetType);
+				Map<String, FilterSet> filterSetMap = (Map<String, FilterSet>) filterSetMapMaybe;
+				if (filterSetMap == null) throw new Exception("filter-sets property was null");
+				for (var entry : filterSetMap.entrySet()) {
+					String filterSetId = entry.getKey();
+					FilterSet filterSet = entry.getValue();
+					if (filterSet == null) {
+						throw new Exception("Filter Set was null: " + filterSetId);
 					}
-					boolean valid = filter.checkValidAndInit(getLogger(), api);
+					boolean valid = filterSet.checkValidAndInit(getLogger(), api);
 					if (valid) {
-						filters.add(filter);
-						getLogger().info(filter.toString());
+						filterSetMap.put(filterSetId, filterSet);
+						getLogger().info("Filter Set " + filterSetId + ": " + filterSet);
+						assert filterSet.getFilters() != null;
+						for (Filter filter : filterSet.getFilters()) {
+							getLogger().info("filter: " + filter.toString());
+						}
+						trackingMaps.put(mapId, filterSetMap);
 					}
 				}
 			} catch (Exception e) {
@@ -183,15 +191,17 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 		CompletableFuture<Void>[] futures = new CompletableFuture[trackingMaps.size()];
 		int i = 0;
-		for (Map.Entry<String, List<Filter>> entry : trackingMaps.entrySet()) {
-			BlueMapMap map = api.getMap(entry.getKey()).orElse(null);
+		for (var entry : trackingMaps.entrySet()) {
+			String mapId = entry.getKey();
+			Map<String, FilterSet> filterSetMap = entry.getValue();
+
+			BlueMapMap map = api.getMap(mapId).orElse(null);
 			if (map == null) {
 				getLogger().warning("Failed to get BlueMapMap for map: " + entry.getKey());
 				continue;
 			}
-			List<Filter> filters = entry.getValue();
 
-			if (filters.isEmpty()) continue;
+			if (filterSetMap.isEmpty()) continue;
 
 			World world = findBukkitWorldFromBlueMapWorld(api, map.getWorld());
 			if (world == null) {
@@ -200,7 +210,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			}
 			List<Entity> entities = world.getEntities();
 
-			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> processEntities(map, filters, entities), executorService);
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> processEntities(map, filterSetMap, entities), executorService);
 			futures[i] = future;
 			i++;
 		}
@@ -221,65 +231,67 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 		return null;
 	}
 
-	private void processEntities(BlueMapMap map, List<Filter> filters, List<Entity> worldEntities) {
-		Map<Entity, String> entityIconMap = new HashMap<>();
-		List<Entity> filteredEntities = new ArrayList<>();
-		for (Entity entity : worldEntities) {
-			for (Filter filter : filters) {
-				if (filter.matches(entity, getLogger())) {
-					if (filter.getIcon() != null) {
-						entityIconMap.put(entity, filter.getIcon());
+	private void processEntities(BlueMapMap map, Map<String, FilterSet> filterSetMap, List<Entity> worldEntities) {
+		for (var entry : filterSetMap.entrySet()) {
+			String filterSetId = entry.getKey();
+			FilterSet filterSet = entry.getValue();
+			assert filterSet.getFilters() != null;
+
+			Map<Entity, String> entityIconMap = new HashMap<>();
+			List<Entity> filteredEntities = new ArrayList<>();
+			for (Entity entity : worldEntities) {
+				for (Filter filter : filterSet.getFilters()) {
+					if (filter.matches(entity, getLogger())) {
+						if (filter.getIcon() != null) {
+							entityIconMap.put(entity, filter.getIcon());
+						}
+						filteredEntities.add(entity);
+						break;
 					}
-					filteredEntities.add(entity);
-					break;
 				}
 			}
-		}
 
-		String key = map.getId() + "_entities";
-		MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(key, id -> MarkerSet.builder()
-				.label("Entities")
-				.toggleable(true)
-				.defaultHidden(true)
-				.build());
+			String key = map.getId() + "_" + filterSetId + "_entities";
+			MarkerSet markerSet = map.getMarkerSets().computeIfAbsent(key, id -> filterSet.createMarkerset());
 
-		markerSet.getMarkers().clear();
+			markerSet.getMarkers().clear();
 
-		for (Entity entity : filteredEntities) {
-			if (entity instanceof Player) continue;
+			for (Entity entity : filteredEntities) {
+				if (entity instanceof Player) continue;
 
-			//TODO: Add special data for Item Frames
-			//TODO: Add special data for Armor Stands
+				//TODO: Add special data for Item Frames
+				//TODO: Add special data for Armor Stands
 
-			String entityInfo;
-			{
-				StringBuilder sb = new StringBuilder();
-				sb.append("Type: ").append(entity.getType());
-				sb.append("\nName: ").append(entity.getName());
-				sb.append("\nUUID: ").append(entity.getUniqueId());
-				sb.append("\nSpawn Reason: ").append(entity.getEntitySpawnReason());
-				sb.append("\nCustom Name: ").append(getCustomName(entity));
-				Location location = entity.getLocation();
-				sb.append("\nLocation: ").append(location.getBlockX()).append(", ").append(location.getBlockY()).append(", ").append(location.getBlockZ()).append(" (").append(location.getWorld().getName()).append(")");
-				sb.append("\nScoreboard Tags: [ ").append(String.join(", ", entity.getScoreboardTags())).append(" ]");
-				entityInfo = sb.toString();
+				String entityInfo;
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.append("Type: ").append(entity.getType());
+					sb.append("\nName: ").append(entity.getName());
+					sb.append("\nUUID: ").append(entity.getUniqueId());
+					sb.append("\nSpawn Reason: ").append(entity.getEntitySpawnReason());
+					sb.append("\nCustom Name: ").append(getCustomName(entity));
+					Location location = entity.getLocation();
+					sb.append("\nLocation: ").append(location.getBlockX()).append(", ").append(location.getBlockY()).append(", ").append(location.getBlockZ()).append(" (").append(location.getWorld().getName()).append(")");
+					sb.append("\nScoreboard Tags: [ ").append(String.join(", ", entity.getScoreboardTags())).append(" ]");
+					entityInfo = sb.toString();
+				}
+//				getLogger().info(entityInfo);
+
+				Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
+				POIMarker marker = POIMarker.builder()
+						.label(entity.getName())
+						.detail(entityInfo.replace("\n", "<br>"))
+						.styleClasses("bmfe-entity")
+						.position(position)
+						.build();
+
+				String icon = entityIconMap.get(entity);
+				if (icon != null) {
+					marker.setIcon("assets/bmfe-icons/" + icon, 24, 24); //TODO: Make anchor point configurable
+				}
+
+				markerSet.put("bmfe." + entity.getUniqueId(), marker);
 			}
-//			getLogger().info(entityInfo);
-
-			Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
-			POIMarker marker = POIMarker.builder()
-					.label(entity.getName())
-					.detail(entityInfo.replace("\n", "<br>"))
-					.styleClasses("bmfe-entity")
-					.position(position)
-					.build();
-
-			String icon = entityIconMap.get(entity);
-			if (icon != null) {
-				marker.setIcon("assets/bmfe-icons/" + icon, 24, 24); //TODO: Make anchor point configurable
-			}
-
-			markerSet.put("bmfe." + entity.getUniqueId(), marker);
 		}
 	}
 
