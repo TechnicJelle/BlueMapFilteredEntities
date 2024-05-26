@@ -181,6 +181,24 @@ public class Filter {
 			}
 		}
 
+		//check if there's ONLY an "exclude" in this filter
+		if (exclude != null &&
+				type == null &&
+				name == null &&
+				customName == null &&
+				uuid == null &&
+				spawnReason == null &&
+				minX == null &&
+				maxX == null &&
+				minZ == null &&
+				maxZ == null &&
+				minY == null &&
+				maxY == null &&
+				scoreboardTags == null) {
+			logger.log(Level.SEVERE, "Filter has only an exclude filter, which is not allowed");
+			valid = false;
+		}
+
 		return valid;
 	}
 
@@ -207,6 +225,8 @@ public class Filter {
 		if (maxY != null && e.getLocation().getY() > maxY) return false;
 
 		//TODO: Implement scoreboard tags
+
+		//TODO: Implement exclusion filters
 
 		logger.info("Entity matched: " + e.getType());
 		return true;
