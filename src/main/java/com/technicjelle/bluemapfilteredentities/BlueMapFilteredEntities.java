@@ -242,6 +242,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			Map<Entity, Filter> entityMatchedByFilterMap = new HashMap<>();
 			List<Entity> filteredEntities = new ArrayList<>();
 			for (Entity entity : worldEntities) {
+				if (entity instanceof Player) continue;
 				for (Filter filter : filterSet.getFilters()) {
 					if (filter.matches(entity, getLogger())) {
 						entityMatchedByFilterMap.put(entity, filter);
@@ -257,7 +258,6 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			markerSet.getMarkers().clear();
 
 			for (Entity entity : filteredEntities) {
-				if (entity instanceof Player) continue;
 				Filter matchedFilter = entityMatchedByFilterMap.get(entity);
 
 				//TODO: Add special data for Item Frames
