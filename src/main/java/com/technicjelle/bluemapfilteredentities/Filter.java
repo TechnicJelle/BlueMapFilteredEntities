@@ -211,6 +211,15 @@ public class Filter {
 	}
 
 	public boolean matches(Entity e, Logger logger) {
+		if (exclude != null) {
+			for (Filter excludingFilter : exclude) {
+				if (excludingFilter.matches(e, logger)) {
+					logger.info("Entity " + e.getType() + " excluded by excluding filter: " + excludingFilter.toString().replace("\n", "|"));
+					return false;
+				}
+			}
+		}
+
 		if (entityType != null && e.getType() != entityType) return false;
 		if (name != null && !e.getName().equals(name)) return false;
 		if (customName != null && !Objects.equals(e.getCustomName(), customName)) return false;
@@ -225,8 +234,6 @@ public class Filter {
 		if (maxY != null && e.getLocation().getY() > maxY) return false;
 
 		if (scoreboardTags != null && !e.getScoreboardTags().containsAll(scoreboardTags)) return false;
-
-		//TODO: Implement exclusion filters
 
 		logger.info("Entity matched: " + e.getType());
 		return true;
