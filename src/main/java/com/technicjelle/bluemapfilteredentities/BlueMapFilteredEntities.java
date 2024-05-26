@@ -52,16 +52,13 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
-		BlueMapAPI.onEnable(onEnableListener);
-		BlueMapAPI.onDisable(onDisableListener);
-	}
-
-	@Override
-	public void onEnable() {
 		new Metrics(this, 21976);
 
 		updateChecker = new UpdateChecker("TechnicJelle", "BlueMapFilteredEntities", getDescription().getVersion());
 		updateChecker.checkAsync();
+
+		BlueMapAPI.onEnable(onEnableListener);
+		BlueMapAPI.onDisable(onDisableListener);
 	}
 
 	private final Consumer<BlueMapAPI> onEnableListener = api -> {
