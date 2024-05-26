@@ -224,7 +224,7 @@ public class Filter {
 		if (minY != null && e.getLocation().getY() < minY) return false;
 		if (maxY != null && e.getLocation().getY() > maxY) return false;
 
-		//TODO: Implement scoreboard tags
+		if (scoreboardTags != null && !e.getScoreboardTags().containsAll(scoreboardTags)) return false;
 
 		//TODO: Implement exclusion filters
 
