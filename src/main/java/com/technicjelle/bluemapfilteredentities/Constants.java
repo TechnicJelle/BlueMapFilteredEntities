@@ -1,0 +1,31 @@
+package com.technicjelle.bluemapfilteredentities;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+
+public class Constants {
+	public static final String CONF_EXT = ".conf";
+	public static final String NODE_FILTER_SETS = "filter-sets";
+
+	public static final String ENTITY_PROPERTY_TYPE = "{type}";
+	public static final String ENTITY_PROPERTY_NAME = "{name}";
+	public static final String ENTITY_PROPERTY_UUID = "{uuid}";
+	public static final String ENTITY_PROPERTY_SPAWN_REASON = "{spawn-reason}";
+	public static final String ENTITY_PROPERTY_CUSTOM_NAME = "{custom-name}";
+	public static final String ENTITY_PROPERTY_X = "{x}";
+	public static final String ENTITY_PROPERTY_Y = "{y}";
+	public static final String ENTITY_PROPERTY_Z = "{z}";
+	public static final String ENTITY_PROPERTY_WORLD = "{world}";
+	public static final String ENTITY_PROPERTY_SCOREBOARD_TAGS = "{scoreboard-tags}";
+
+	@NotNull
+	public static String getNullableString(String toNotNull) {
+		return toNotNull == null ? "null" : toNotNull;
+	}
+
+	@NotNull
+	public static String listToString(Collection<String> list) {
+		return "[ " + String.join(", ", list) + " ]";
+	}
+}

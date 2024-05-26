@@ -12,9 +12,12 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.technicjelle.bluemapfilteredentities.Constants.*;
 
 @ConfigSerializable
 public class Filter {
@@ -64,11 +67,15 @@ public class Filter {
 
 	@Nullable
 	@Comment("Scoreboard tags of the entity to filter")
-	private String[] scoreboardTags;
+	private Set<String> scoreboardTags;
 
 	@Nullable
 	@Comment("Path to the icon to use for entities that were matched by this filter")
 	private String icon;
+
+	@Nullable
+	@Comment("The information that should be displayed when the entity's marker is clicked on the web map")
+	private String popupInfoTemplate;
 
 	@Nullable
 	@Comment("Sub-filters to exclude entities from the filter")
@@ -150,6 +157,22 @@ public class Filter {
 			}
 		}
 
+		if (popupInfoTemplate == null) {
+			popupInfoTemplate = "Type: " + ENTITY_PROPERTY_TYPE + "\n" +
+					"Name: " + ENTITY_PROPERTY_NAME + "\n" +
+					"UUID: " + ENTITY_PROPERTY_UUID + "\n" +
+					"Spawn Reason: " + ENTITY_PROPERTY_SPAWN_REASON + "\n" +
+					"Custom Name: " + ENTITY_PROPERTY_CUSTOM_NAME + "\n" +
+					"Location: " + ENTITY_PROPERTY_X + ", " + ENTITY_PROPERTY_Y + ", " + ENTITY_PROPERTY_Z + " (" + ENTITY_PROPERTY_WORLD + ")\n" +
+					"Scoreboard Tags: " + ENTITY_PROPERTY_SCOREBOARD_TAGS;
+		} else {
+			if (popupInfoTemplate.isBlank()) {
+				logger.log(Level.SEVERE, "Popup info template defined, but empty");
+				valid = false;
+			}
+			popupInfoTemplate = popupInfoTemplate.strip();
+		}
+
 		if (exclude != null) {
 			for (Filter filter : exclude) {
 				if (!filter.checkValidAndInit(logger, bmApi)) {
@@ -163,6 +186,10 @@ public class Filter {
 
 	public @Nullable String getIcon() {
 		return icon;
+	}
+
+	public @Nullable String getPopupInfoWithTemplate() {
+		return popupInfoTemplate;
 	}
 
 	public boolean matches(Entity e, Logger logger) {
@@ -199,9 +226,9 @@ public class Filter {
 		if (maxZ != null) sb.append(" max-z: ").append(maxZ).append("\n");
 		if (minY != null) sb.append(" min-y: ").append(minY).append("\n");
 		if (maxY != null) sb.append(" max-y: ").append(maxY).append("\n");
-		if (scoreboardTags != null)
-			sb.append(" scoreboard-tags: [ ").append(String.join(", ", scoreboardTags)).append(" ]\n");
+		if (scoreboardTags != null) sb.append(" scoreboard-tags: ").append(listToString(scoreboardTags)).append("\n");
 		if (icon != null) sb.append(" icon: ").append(icon).append("\n");
+		if (popupInfoTemplate != null) sb.append(" popup-info-template: ").append(popupInfoTemplate).append("\n");
 		if (exclude != null) {
 			sb.append(" exclude:");
 			for (Filter filter : exclude) {

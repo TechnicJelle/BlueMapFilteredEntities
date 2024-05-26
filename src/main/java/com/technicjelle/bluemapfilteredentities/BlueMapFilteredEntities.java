@@ -11,7 +11,6 @@ import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.markers.POIMarker;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -19,11 +18,11 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -42,10 +41,9 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
-public final class BlueMapFilteredEntities extends JavaPlugin {
-	private static final String CONF_EXT = ".conf";
-	private static final String NODE_FILTER_SETS = "filter-sets";
+import static com.technicjelle.bluemapfilteredentities.Constants.*;
 
+public final class BlueMapFilteredEntities extends JavaPlugin {
 	private UpdateChecker updateChecker;
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -237,14 +235,12 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			FilterSet filterSet = entry.getValue();
 			assert filterSet.getFilters() != null;
 
-			Map<Entity, String> entityIconMap = new HashMap<>();
+			Map<Entity, Filter> entityMatchedByFilterMap = new HashMap<>();
 			List<Entity> filteredEntities = new ArrayList<>();
 			for (Entity entity : worldEntities) {
 				for (Filter filter : filterSet.getFilters()) {
 					if (filter.matches(entity, getLogger())) {
-						if (filter.getIcon() != null) {
-							entityIconMap.put(entity, filter.getIcon());
-						}
+						entityMatchedByFilterMap.put(entity, filter);
 						filteredEntities.add(entity);
 						break;
 					}
@@ -258,24 +254,24 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 			for (Entity entity : filteredEntities) {
 				if (entity instanceof Player) continue;
+				Filter matchedFilter = entityMatchedByFilterMap.get(entity);
 
 				//TODO: Add special data for Item Frames
 				//TODO: Add special data for Armor Stands
 
-				String entityInfo;
-				{
-					StringBuilder sb = new StringBuilder();
-					sb.append("Type: ").append(entity.getType());
-					sb.append("\nName: ").append(entity.getName());
-					sb.append("\nUUID: ").append(entity.getUniqueId());
-					sb.append("\nSpawn Reason: ").append(entity.getEntitySpawnReason());
-					sb.append("\nCustom Name: ").append(getCustomName(entity));
-					Location location = entity.getLocation();
-					sb.append("\nLocation: ").append(location.getBlockX()).append(", ").append(location.getBlockY()).append(", ").append(location.getBlockZ()).append(" (").append(location.getWorld().getName()).append(")");
-					sb.append("\nScoreboard Tags: [ ").append(String.join(", ", entity.getScoreboardTags())).append(" ]");
-					entityInfo = sb.toString();
-				}
-//				getLogger().info(entityInfo);
+				String entityInfoTemplate = matchedFilter.getPopupInfoWithTemplate();
+				assert entityInfoTemplate != null;
+				String entityInfo = entityInfoTemplate.
+						replace(ENTITY_PROPERTY_TYPE, entity.getType().name()).
+						replace(ENTITY_PROPERTY_NAME, entity.getName()).
+						replace(ENTITY_PROPERTY_UUID, entity.getUniqueId().toString()).
+						replace(ENTITY_PROPERTY_SPAWN_REASON, entity.getEntitySpawnReason().name()).
+						replace(ENTITY_PROPERTY_CUSTOM_NAME, getNullableString(getCustomName(entity))).
+						replace(ENTITY_PROPERTY_X, String.valueOf(entity.getLocation().getBlockX())).
+						replace(ENTITY_PROPERTY_Y, String.valueOf(entity.getLocation().getBlockY())).
+						replace(ENTITY_PROPERTY_Z, String.valueOf(entity.getLocation().getBlockZ())).
+						replace(ENTITY_PROPERTY_WORLD, entity.getWorld().getName()).
+						replace(ENTITY_PROPERTY_SCOREBOARD_TAGS, listToString(entity.getScoreboardTags()));
 
 				Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
 				POIMarker marker = POIMarker.builder()
@@ -285,7 +281,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 						.position(position)
 						.build();
 
-				String icon = entityIconMap.get(entity);
+				String icon = matchedFilter.getIcon();
 				if (icon != null) {
 					marker.setIcon("assets/bmfe-icons/" + icon, 24, 24); //TODO: Make anchor point configurable
 				}
@@ -296,7 +292,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	}
 
 	@Nullable
-	public static String getCustomName(Entity entity) {
+	private static String getCustomName(Entity entity) {
 		if (entity.getType() == EntityType.DROPPED_ITEM) {
 			Item item = (Item) entity;
 			ItemMeta itemMeta = item.getItemStack().getItemMeta();
