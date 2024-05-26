@@ -215,7 +215,7 @@ public class Filter {
 		if (name != null && !e.getName().equals(name)) return false;
 		if (customName != null && !Objects.equals(e.getCustomName(), customName)) return false;
 		if (entityUUID != null && !e.getUniqueId().equals(entityUUID)) return false;
-		if (entitySpawnReason != null && e.getEntitySpawnReason().equals(entitySpawnReason)) return false;
+		if (entitySpawnReason != null && e.getEntitySpawnReason() != entitySpawnReason) return false;
 
 		if (minX != null && e.getLocation().getX() < minX) return false;
 		if (maxX != null && e.getLocation().getX() > maxX) return false;
