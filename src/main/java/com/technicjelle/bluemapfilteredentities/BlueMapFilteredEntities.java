@@ -288,7 +288,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 				String icon = matchedFilter.getIcon();
 				if (icon != null) {
-					marker.setIcon("assets/bmfe-icons/" + icon, 24, 24); //TODO: Make anchor point configurable
+					marker.setIcon("assets/bmfe-icons/" + icon, matchedFilter.getAnchor());
 				}
 
 				markerSet.put("bmfe." + entity.getUniqueId(), marker);

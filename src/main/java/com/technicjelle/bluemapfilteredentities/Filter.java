@@ -1,9 +1,11 @@
 package com.technicjelle.bluemapfilteredentities;
 
+import com.flowpowered.math.vector.Vector2i;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -72,6 +74,10 @@ public class Filter {
 	@Nullable
 	@Comment("Path to the icon to use for entities that were matched by this filter")
 	private String icon;
+
+	@Nullable
+	@Comment("The icon anchor")
+	private Vector2 anchor;
 
 	@Nullable
 	@Comment("The information that should be displayed when the entity's marker is clicked on the web map")
@@ -157,6 +163,18 @@ public class Filter {
 			}
 		}
 
+		if (anchor != null) {
+			if (anchor.checkInvalid()) {
+				logger.log(Level.SEVERE, "Invalid anchor");
+				valid = false;
+			}
+
+			if (icon == null || icon.isBlank()) {
+				logger.log(Level.SEVERE, "Anchor is defined, but there is no icon");
+				valid = false;
+			}
+		}
+
 		if (popupInfoTemplate == null) {
 			popupInfoTemplate = "Type: " + ENTITY_PROPERTY_TYPE + "\n" +
 					"Name: " + ENTITY_PROPERTY_NAME + "\n" +
@@ -204,6 +222,13 @@ public class Filter {
 
 	public @Nullable String getIcon() {
 		return icon;
+	}
+
+	public @NotNull Vector2i getAnchor() {
+		if (anchor == null) {
+			return new Vector2i();
+		}
+		return anchor.toVector2i();
 	}
 
 	public @Nullable String getPopupInfoWithTemplate() {
