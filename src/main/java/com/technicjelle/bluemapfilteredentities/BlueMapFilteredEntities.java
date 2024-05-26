@@ -277,7 +277,8 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 						replace(ENTITY_PROPERTY_WORLD, entity.getWorld().getName()).
 						replace(ENTITY_PROPERTY_SCOREBOARD_TAGS, listToString(entity.getScoreboardTags()));
 
-				Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ());
+				double yOffset = entity.getHeight() / 2.0;
+				Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY() + yOffset, entity.getLocation().getZ());
 				POIMarker marker = POIMarker.builder()
 						.label(entity.getName())
 						.detail(entityInfo.replace("\n", "<br>"))
