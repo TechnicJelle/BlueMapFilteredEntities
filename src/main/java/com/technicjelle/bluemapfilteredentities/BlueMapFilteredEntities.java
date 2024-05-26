@@ -57,13 +57,16 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 		updateChecker = new UpdateChecker("TechnicJelle", "BlueMapFilteredEntities", getDescription().getVersion());
 		updateChecker.checkAsync();
 
-		BlueMapAPI.onEnable(onEnableListener);
+		BlueMapAPI.onEnable(onEnableListenerConfig);
 		BlueMapAPI.onDisable(onDisableListener);
 	}
 
-	private final Consumer<BlueMapAPI> onEnableListener = api -> {
-		updateChecker.logUpdateMessage(getLogger());
+	@Override
+	public void onEnable() {
+		BlueMapAPI.onEnable(onEnableListenerMaps);
+	}
 
+	private final Consumer<BlueMapAPI> onEnableListenerConfig = api -> {
 		// Copy script & style to webapp
 		try {
 			BMCopy.jarResourceToWebApp(api, getClassLoader(), "bmfe.js", "bmfe.js", true);
@@ -177,6 +180,10 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 			getLogger().info("Loaded config for map: " + map.getId());
 		}
+	};
+
+	private final Consumer<BlueMapAPI> onEnableListenerMaps = api -> {
+		updateChecker.logUpdateMessage(getLogger());
 
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> processMaps(api), 0, 20 * 10);
 	};
@@ -305,7 +312,8 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		BlueMapAPI.unregisterListener(onEnableListener);
+		BlueMapAPI.unregisterListener(onEnableListenerConfig);
+		BlueMapAPI.unregisterListener(onEnableListenerMaps);
 		BlueMapAPI.unregisterListener(onDisableListener);
 	}
 }
