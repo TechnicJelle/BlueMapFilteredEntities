@@ -280,7 +280,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 				double yOffset = entity.getHeight() / 2.0;
 				Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY() + yOffset, entity.getLocation().getZ());
 				POIMarker marker = POIMarker.builder()
-						.label(entity.getName())
+						.label(entityInfo.split("\n")[0]) // First line of entityInfo
 						.detail(entityInfo.replace("\n", "<br>"))
 						.styleClasses("bmfe-entity")
 						.position(position)
