@@ -48,7 +48,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	//TODO: Replace String with BlueMapMap when the bmAPI is updated to include the BlueMapMap hashcode:
-	private final Map<String, Map<String, FilterSet>> trackingMaps = new HashMap<>();
+	private final Map<HashedBlueMapMap, Map<String, FilterSet>> trackingMaps = new HashMap<>();
 
 	@Override
 	public void onLoad() {
@@ -126,7 +126,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 
 			Optional<BlueMapMap> oMap = api.getMap(mapId);
 			if (oMap.isEmpty()) {
-				getLogger().warning("Map not found: " + mapId);
+				getLogger().log(Level.SEVERE, "BlueMap Map not found: " + mapId);
 				continue;
 			}
 			BlueMapMap map = oMap.get();
@@ -145,33 +145,37 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 				continue;
 			}
 			if (root == null) {
-				getLogger().warning("Failed to load config root for map " + map.getId());
+				getLogger().log(Level.SEVERE, "Failed to load config root for map " + map.getId());
 				continue;
 			}
 
 			try {
-				ConfigurationNode filtersNode = root.node(NODE_FILTER_SETS);
-				if (filtersNode.virtual()) throw new Exception("filter-sets property is required");
+				ConfigurationNode configFilterSetsNode = root.node(NODE_FILTER_SETS);
+				if (configFilterSetsNode.virtual()) throw new Exception("filter-sets property is required");
 				Type filterSetType = new TypeToken<Map<String, FilterSet>>() {}.getType();
-				Object filterSetMapMaybe = filtersNode.get(filterSetType);
-				Map<String, FilterSet> filterSetMap = (Map<String, FilterSet>) filterSetMapMaybe;
-				if (filterSetMap == null) throw new Exception("filter-sets property was null");
-				for (var entry : filterSetMap.entrySet()) {
+				Object configFilterSetsMaybe = configFilterSetsNode.get(filterSetType);
+				Map<String, FilterSet> configFilterSets = (Map<String, FilterSet>) configFilterSetsMaybe;
+				if (configFilterSets == null) throw new Exception("filter-sets property was null");
+
+				Map<String, FilterSet> validFilterSets = new HashMap<>();
+				for (var entry : configFilterSets.entrySet()) {
 					String filterSetId = entry.getKey();
 					FilterSet filterSet = entry.getValue();
+					getLogger().info("Loading filter set: " + filterSetId);
 					if (filterSet == null) {
-						throw new Exception("Filter Set was null: " + filterSetId);
+						getLogger().log(Level.SEVERE, "Filter Set " + filterSetId + " is null");
+						continue;
 					}
 					boolean valid = filterSet.checkValidAndInit(getLogger(), api);
 					if (valid) {
-						filterSetMap.put(filterSetId, filterSet);
+						validFilterSets.put(filterSetId, filterSet);
 						getLogger().info("Filter Set " + filterSetId + ": " + filterSet);
 						assert filterSet.getFilters() != null;
 						for (Filter filter : filterSet.getFilters()) {
 							getLogger().info("filter: " + filter.toString());
 						}
-						trackingMaps.put(mapId, filterSetMap);
 					}
+					trackingMaps.put(new HashedBlueMapMap(map), validFilterSets);
 				}
 			} catch (Exception e) {
 				getLogger().log(Level.SEVERE, "Failed to load filters for map " + map.getId(), e);
@@ -194,14 +198,8 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 		CompletableFuture<Void>[] futures = new CompletableFuture[trackingMaps.size()];
 		int i = 0;
 		for (var entry : trackingMaps.entrySet()) {
-			String mapId = entry.getKey();
+			BlueMapMap map = entry.getKey().getMap();
 			Map<String, FilterSet> filterSetMap = entry.getValue();
-
-			BlueMapMap map = api.getMap(mapId).orElse(null);
-			if (map == null) {
-				getLogger().warning("Failed to get BlueMapMap for map: " + entry.getKey());
-				continue;
-			}
 
 			if (filterSetMap.isEmpty()) continue;
 
