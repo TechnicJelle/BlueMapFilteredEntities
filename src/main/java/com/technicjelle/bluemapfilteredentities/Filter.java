@@ -199,8 +199,8 @@ public class Filter {
 		}
 
 		if (popupInfoTemplate == null) {
-			popupInfoTemplate = "Type: " + ENTITY_PROPERTY_TYPE + "\n" +
-					"Name: " + ENTITY_PROPERTY_NAME + "\n" +
+			popupInfoTemplate = "Name: " + ENTITY_PROPERTY_NAME + "\n" +
+					"Type: " + ENTITY_PROPERTY_TYPE + "\n" +
 					"UUID: " + ENTITY_PROPERTY_UUID + "\n" +
 					"Spawn Reason: " + ENTITY_PROPERTY_SPAWN_REASON + "\n" +
 					"Custom Name: " + ENTITY_PROPERTY_CUSTOM_NAME + "\n" +
