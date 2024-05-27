@@ -44,6 +44,10 @@ public class Filter {
 	private String spawnReason;
 
 	@Nullable
+	@Comment("Bukkit Entity Class")
+	private String instanceOf;
+
+	@Nullable
 	@Comment("Minimum X coordinate of the entity to filter")
 	private Float minX;
 
@@ -96,6 +100,9 @@ public class Filter {
 	@Nullable
 	private transient CreatureSpawnEvent.SpawnReason entitySpawnReason;
 
+	@Nullable
+	private transient Class<?> entityInstanceOf;
+
 	public boolean checkValidAndInit(Logger logger, BlueMapAPI bmApi) {
 		boolean valid = true;
 
@@ -136,6 +143,22 @@ public class Filter {
 				entitySpawnReason = CreatureSpawnEvent.SpawnReason.valueOf(spawnReason.strip().toUpperCase(Locale.ROOT));
 			} catch (IllegalArgumentException e) {
 				logger.log(Level.SEVERE, "Invalid spawn reason: " + spawnReason);
+				valid = false;
+			}
+		}
+
+		if (instanceOf != null) {
+			// Try normally first
+			entityInstanceOf = tryGetClass(instanceOf);
+
+			// If the user didn't provide the full class name, try to prepend the package
+			if (entityInstanceOf == null) {
+				entityInstanceOf = tryGetClass("org.bukkit.entity." + instanceOf);
+			}
+
+			// Just couldn't find the class at all
+			if (entityInstanceOf == null) {
+				logger.log(Level.SEVERE, "Invalid class: " + instanceOf);
 				valid = false;
 			}
 		}
@@ -250,6 +273,7 @@ public class Filter {
 		if (customName != null && !Objects.equals(e.getCustomName(), customName)) return false;
 		if (entityUUID != null && !e.getUniqueId().equals(entityUUID)) return false;
 		if (entitySpawnReason != null && e.getEntitySpawnReason() != entitySpawnReason) return false;
+		if (entityInstanceOf != null && !entityInstanceOf.isInstance(e)) return false;
 
 		if (minX != null && e.getLocation().getX() < minX) return false;
 		if (maxX != null && e.getLocation().getX() > maxX) return false;

@@ -1,6 +1,7 @@
 package com.technicjelle.bluemapfilteredentities;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -27,5 +28,14 @@ public class Constants {
 	@NotNull
 	public static String listToString(Collection<String> list) {
 		return "[ " + String.join(", ", list) + " ]";
+	}
+
+	@Nullable
+	public static Class<?> tryGetClass(String className) {
+		try {
+			return Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
 	}
 }
