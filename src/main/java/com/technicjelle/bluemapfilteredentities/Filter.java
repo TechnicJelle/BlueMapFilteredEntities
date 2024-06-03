@@ -296,14 +296,16 @@ public class Filter {
 		if (customName != null) sb.append(" custom-name: ").append(customName).append("\n");
 		if (entityUUID != null) sb.append(" UUID: ").append(entityUUID).append("\n");
 		if (entitySpawnReason != null) sb.append(" spawn-reason: ").append(entitySpawnReason).append("\n");
+		if (entityInstanceOf != null) sb.append(" instance-of: ").append(entityInstanceOf).append("\n");
 		if (minX != null) sb.append(" min-x: ").append(minX).append("\n");
 		if (maxX != null) sb.append(" max-x: ").append(maxX).append("\n");
 		if (minZ != null) sb.append(" min-z: ").append(minZ).append("\n");
 		if (maxZ != null) sb.append(" max-z: ").append(maxZ).append("\n");
 		if (minY != null) sb.append(" min-y: ").append(minY).append("\n");
 		if (maxY != null) sb.append(" max-y: ").append(maxY).append("\n");
-		if (scoreboardTags != null) sb.append(" scoreboard-tags: ").append(listToString(scoreboardTags)).append("\n");
+		if (scoreboardTags != null) sb.append(" scoreboard-tags: ").append(collectionToString(scoreboardTags)).append("\n");
 		if (icon != null) sb.append(" icon: ").append(icon).append("\n");
+		if (anchor != null) sb.append(" anchor: ").append(anchor).append("\n");
 		if (popupInfoTemplate != null) sb.append(" popup-info-template: ").append(popupInfoTemplate).append("\n");
 		if (exclude != null) {
 			sb.append(" exclude:");

@@ -273,7 +273,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 						replace(ENTITY_PROPERTY_Y, String.valueOf(entity.getLocation().getBlockY())).
 						replace(ENTITY_PROPERTY_Z, String.valueOf(entity.getLocation().getBlockZ())).
 						replace(ENTITY_PROPERTY_WORLD, entity.getWorld().getName()).
-						replace(ENTITY_PROPERTY_SCOREBOARD_TAGS, listToString(entity.getScoreboardTags()));
+						replace(ENTITY_PROPERTY_SCOREBOARD_TAGS, collectionToString(entity.getScoreboardTags()));
 
 				double yOffset = entity.getHeight() / 2.0;
 				Vector3d position = new Vector3d(entity.getLocation().getX(), entity.getLocation().getY() + yOffset, entity.getLocation().getZ());

@@ -26,7 +26,7 @@ public class Constants {
 	}
 
 	@NotNull
-	public static String listToString(Collection<String> list) {
+	public static String collectionToString(Collection<String> list) {
 		return "[ " + String.join(", ", list) + " ]";
 	}
 

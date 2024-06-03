@@ -24,4 +24,9 @@ public class Vector2 {
 		if (x == null || y == null) return new Vector2i();
 		return new Vector2i(x.intValue(), y.intValue());
 	}
+
+	@Override
+	public String toString() {
+		return "Vector2 { x: " + x + ", y: " + y + " }";
+	}
 }
