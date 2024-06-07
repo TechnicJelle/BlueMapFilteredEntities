@@ -171,7 +171,8 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 							getLogger().info("filter: " + filter.toString());
 						}
 					}
-					trackingMaps.put(new HashedBlueMapMap(map), validFilterSets);
+					if (!validFilterSets.isEmpty())
+						trackingMaps.put(new HashedBlueMapMap(map), validFilterSets);
 				}
 			} catch (Exception e) {
 				getLogger().log(Level.SEVERE, "Failed to load filters for map " + map.getId(), e);
@@ -189,6 +190,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	};
 
 	private void processMaps(BlueMapAPI api) {
+		if (trackingMaps.isEmpty()) return;
 		long millisAtStart = System.currentTimeMillis();
 
 		CompletableFuture<Void>[] futures = new CompletableFuture[trackingMaps.size()];
