@@ -82,7 +82,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 				try {
 					Files.copy(Objects.requireNonNull(getResource("default.conf")), mapConfigPath);
 				} catch (IOException e) {
-					getLogger().log(Level.SEVERE, "Failed to copy default config for map " + map.getId(), e);
+					getLogger().log(Level.SEVERE, "Failed to copy default config for map: " + map.getId(), e);
 				}
 			}
 		}
@@ -97,7 +97,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					try {
 						BMCopy.fileToWebApp(api, path, "bmfe-icons/" + relativeToIconFolder, true);
 					} catch (IOException e) {
-						getLogger().log(Level.SEVERE, "Failed to copy icon " + path + " to BlueMap webapp!", e);
+						getLogger().log(Level.SEVERE, "Failed to copy icon '" + path + "' to BlueMap webapp!", e);
 					}
 				});
 			} catch (IOException e) {
@@ -108,8 +108,6 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 		}
 
 		// Load configs
-		getLogger().info("Loading existing configs");
-
 		File configPath = getDataFolder();
 		File[] files = configPath.listFiles();
 		if (files == null) return;
@@ -137,11 +135,11 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			try {
 				root = loader.load();
 			} catch (Exception e) {
-				getLogger().log(Level.SEVERE, "Failed to load config for map " + map.getId(), e);
+				getLogger().log(Level.SEVERE, "Failed to load config for map: " + map.getId(), e);
 				continue;
 			}
 			if (root == null) {
-				getLogger().log(Level.SEVERE, "Failed to load config root for map " + map.getId());
+				getLogger().log(Level.SEVERE, "Failed to load config root for map: " + map.getId());
 				continue;
 			}
 
@@ -159,27 +157,19 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					FilterSet filterSet = entry.getValue();
 					getLogger().info("Loading filter set: " + filterSetId);
 					if (filterSet == null) {
-						getLogger().log(Level.SEVERE, "Filter Set " + filterSetId + " is null");
+						getLogger().log(Level.SEVERE, "Filter Set '" + filterSetId + "' is null");
 						continue;
 					}
 					boolean valid = filterSet.checkValidAndInit(getLogger(), api);
 					if (valid) {
 						validFilterSets.put(filterSetId, filterSet);
-						getLogger().info("Filter Set " + filterSetId + ": " + filterSet);
-						assert filterSet.getFilters() != null;
-						for (Filter filter : filterSet.getFilters()) {
-							getLogger().info("filter: " + filter.toString());
-						}
 					}
 					if (!validFilterSets.isEmpty())
 						trackingMaps.put(new HashedBlueMapMap(map), validFilterSets);
 				}
 			} catch (Exception e) {
-				getLogger().log(Level.SEVERE, "Failed to load filters for map " + map.getId(), e);
-				continue;
+				getLogger().log(Level.SEVERE, "Failed to load filters for map: " + map.getId(), e);
 			}
-
-			getLogger().info("Loaded config for map: " + map.getId());
 		}
 	};
 
@@ -213,8 +203,15 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			i++;
 		}
 
-		CompletableFuture.allOf(futures).thenRun(() ->
-				getLogger().info("Took " + (System.currentTimeMillis() - millisAtStart) + "ms to add entity markers for all maps."));
+		CompletableFuture.allOf(futures)
+				.thenRun(() -> {
+					long diff = System.currentTimeMillis() - millisAtStart;
+					if (diff > 15) {
+						getLogger().warning("Took " + (System.currentTimeMillis() - millisAtStart) + "ms to add entity markers for all maps!\n" +
+								"This is fine for the first run, but if it more often, you might want to reduce the number of entities or filters.");
+					}
+				})
+		;
 	}
 
 	private static World findBukkitWorldFromBlueMapWorld(BlueMapAPI api, BlueMapWorld targetBMWorld) {
@@ -240,7 +237,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 			for (Entity entity : worldEntities) {
 				if (entity instanceof Player) continue;
 				for (Filter filter : filterSet.getFilters()) {
-					if (filter.matches(entity, getLogger())) {
+					if (filter.matches(entity)) {
 						entityMatchedByFilterMap.put(entity, filter);
 						filteredEntities.add(entity);
 						break;

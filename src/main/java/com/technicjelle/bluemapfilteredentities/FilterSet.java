@@ -69,11 +69,4 @@ public class FilterSet {
 				.defaultHidden(defaultHidden)
 				.build();
 	}
-
-	@Override
-	public String toString() {
-		return "\n" + " label: " + label + "\n" +
-				" toggleable: " + toggleable + "\n" +
-				" defaultHidden: " + defaultHidden;
-	}
 }
