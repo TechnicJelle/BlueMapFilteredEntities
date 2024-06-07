@@ -13,12 +13,8 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -292,19 +288,6 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 				markerSet.put("bmfe." + entity.getUniqueId(), marker);
 			}
 		}
-	}
-
-	@Nullable
-	private static String getCustomName(Entity entity) {
-		if (entity.getType() == EntityType.DROPPED_ITEM) {
-			Item item = (Item) entity;
-			ItemMeta itemMeta = item.getItemStack().getItemMeta();
-			if (itemMeta.hasDisplayName()) {
-				return itemMeta.getDisplayName();
-			}
-		}
-
-		return entity.getCustomName();
 	}
 
 	private final Consumer<BlueMapAPI> onDisableListener = api -> Bukkit.getScheduler().cancelTasks(this);

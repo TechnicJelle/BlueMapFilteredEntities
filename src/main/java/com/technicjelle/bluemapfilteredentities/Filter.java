@@ -13,11 +13,11 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import static com.technicjelle.bluemapfilteredentities.Constants.*;
 
@@ -29,11 +29,11 @@ public class Filter {
 
 	@Nullable
 	@Comment("Name of the entity to filter")
-	private String name;
+	private Pattern name;
 
 	@Nullable
 	@Comment("Custom name of the entity to filter")
-	private String customName;
+	private Pattern customName;
 
 	@Nullable
 	@Comment("UUID of the entity to filter")
@@ -116,14 +116,14 @@ public class Filter {
 		}
 
 		if (name != null) {
-			if (name.isBlank()) {
+			if (name.pattern().isBlank()) {
 				logger.log(Level.SEVERE, "Name defined, but empty");
 				valid = false;
 			}
 		}
 
 		if (customName != null) {
-			if (customName.isBlank()) {
+			if (customName.pattern().isBlank()) {
 				logger.log(Level.SEVERE, "Custom name defined, but empty");
 				valid = false;
 			}
@@ -269,8 +269,12 @@ public class Filter {
 		}
 
 		if (entityType != null && e.getType() != entityType) return false;
-		if (name != null && !e.getName().equals(name)) return false;
-		if (customName != null && !Objects.equals(e.getCustomName(), customName)) return false;
+		if (name != null && !name.matcher(e.getName()).find()) return false;
+		if (customName != null) {
+			@Nullable String entityCustomName = getCustomName(e);
+			if (entityCustomName != null && !customName.matcher(entityCustomName).find())
+				return false;
+		}
 		if (entityUUID != null && !e.getUniqueId().equals(entityUUID)) return false;
 		if (entitySpawnReason != null && e.getEntitySpawnReason() != entitySpawnReason) return false;
 		if (entityInstanceOf != null && !entityInstanceOf.isInstance(e)) return false;
@@ -292,8 +296,8 @@ public class Filter {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("\n");
 		if (entityType != null) sb.append(" type: ").append(entityType).append("\n");
-		if (name != null) sb.append(" name: ").append(name).append("\n");
-		if (customName != null) sb.append(" custom-name: ").append(customName).append("\n");
+		if (name != null) sb.append(" name: ").append(name.pattern()).append("\n");
+		if (customName != null) sb.append(" custom-name: ").append(customName.pattern()).append("\n");
 		if (entityUUID != null) sb.append(" UUID: ").append(entityUUID).append("\n");
 		if (entitySpawnReason != null) sb.append(" spawn-reason: ").append(entitySpawnReason).append("\n");
 		if (entityInstanceOf != null) sb.append(" instance-of: ").append(entityInstanceOf).append("\n");

@@ -1,5 +1,9 @@
 package com.technicjelle.bluemapfilteredentities;
 
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,5 +41,18 @@ public class Constants {
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
+	}
+
+	@Nullable
+	public static String getCustomName(Entity entity) {
+		if (entity.getType() == EntityType.DROPPED_ITEM) {
+			Item item = (Item) entity;
+			ItemMeta itemMeta = item.getItemStack().getItemMeta();
+			if (itemMeta.hasDisplayName()) {
+				return itemMeta.getDisplayName();
+			}
+		}
+
+		return entity.getCustomName();
 	}
 }
