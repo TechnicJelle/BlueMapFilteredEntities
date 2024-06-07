@@ -163,6 +163,14 @@ public class Filter {
 			}
 		}
 
+		if (entityInstanceOf != null) {
+			//check if it's a subclass of bukkit entity
+			if (!Entity.class.isAssignableFrom(entityInstanceOf)) {
+				logger.log(Level.SEVERE, "Class is not a subclass of Bukkit Entity: " + instanceOf);
+				valid = false;
+			}
+		}
+
 		if (minX != null && maxX != null && minX > maxX) {
 			logger.log(Level.SEVERE, "min-x is greater than max-x");
 			valid = false;
