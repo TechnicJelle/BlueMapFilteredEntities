@@ -229,6 +229,7 @@ public class Filter {
 				customName == null &&
 				uuid == null &&
 				spawnReason == null &&
+				instanceOf == null &&
 				minX == null &&
 				maxX == null &&
 				minZ == null &&
