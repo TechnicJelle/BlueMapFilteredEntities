@@ -281,7 +281,7 @@ public class Filter {
 		if (name != null && !name.matcher(e.getName()).find()) return false;
 		if (customName != null) {
 			@Nullable String entityCustomName = getCustomName(e);
-			if (entityCustomName != null && !customName.matcher(entityCustomName).find())
+			if (entityCustomName == null || !customName.matcher(entityCustomName).find())
 				return false;
 		}
 		if (entityUUID != null && !e.getUniqueId().equals(entityUUID)) return false;
