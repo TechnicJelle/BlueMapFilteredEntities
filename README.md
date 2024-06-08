@@ -19,14 +19,26 @@ When you install this plugin for the first time, it will generate a template con
 The general format of this config is very similar to BlueMap's own built-in marker configuration,
 but instead of configuring specific markers, you have to configure filters.
 
-### Filter Sets
-You can define filter sets in the `filter-sets` section:
+The general idea is that you have one or more "filter-sets", which are kind of like categories.\
+(These translate basically directly to BlueMap's own marker-sets.)\
+You then define all your filter-sets inside a big list at the root of your configuration file(s).
+
+Inside each filter-set, you define one or more filters,
+which are responsible for adding the specific markers for each entity.
+
+### Filter-Sets List
+This is the base of the file.
+Every .conf file *must* have a single `filter-sets` section at the root.
+
+Inside this section, you can define your actual filter-sets.
+
 ```hocon
 filter-sets: {
-  # Filter sets go here
+  # Filter sets go in here
 }
 ```
 
+### Filter-Sets
 A filter-set looks like this:
 ```hocon
 my-filter-set: {
@@ -34,14 +46,21 @@ my-filter-set: {
   toggleable: true  # Optional, default: true
   default-hidden: true  # Optional, default: true
   filters: [
-    # Filters go here
+    # Filters go in here
   ]
 }
 ```
 You might recognise this format from BlueMap's own marker configuration.
 
-### Entity data you can filter on
-You can filter based on all kinds of entity data:
+### Filters
+A single filter contains one or multiple properties, between a pair of curly brackes: ` { } `
+
+The different filters inside a filter-set are combined with OR logic,
+meaning that if any of the filters match, the entity will be matched.\
+_Inside_ each filter, the different conditions are combined with AND logic,
+meaning that all conditions must be met for the filter to match.
+
+#### Entity data you can filter on
 - `type: <string>`: The entity type.
   - Any of these: https://jd.papermc.io/paper/1.20.6/org/bukkit/entity/EntityType.html
   - This string is case-insensitive.
@@ -55,7 +74,7 @@ You can filter based on all kinds of entity data:
   - For normal mobs, this is basically the same as the `type` property.
   - For nametagged entities, this is their new name.
   - For dropped items, this is the actual item name.
-    This does not change even if you have renamed it in an anvil. 
+    This does not change even if you have renamed it in an anvil.
 - `custom-name: <string>`: The custom name of the entity.
   - This is also a case-sensitive regex pattern, just like the `name` property.
   - Most entities don't have one of these.
@@ -90,12 +109,7 @@ You can filter based on all kinds of entity data:
 
 All of these are optional, but you must have at least _something_ in the filter.
 
-The different filters inside a filter-set are combined with OR logic,
-meaning that if any of the filters match, the entity will be matched.\
-_Inside_ each filter, the different conditions are combined with AND logic,
-meaning that all conditions must be met for the filter to match.
-
-### Appearance (Extra filter options)
+#### Appearance (Extra filter options)
 Per filter, there are some other options that don't affect the filtering,
 but do affect the way matched entities are displayed on the map:
 - `icon: <string>`: The icon to use for all the markers on the map that match this filter.
@@ -110,7 +124,7 @@ but do affect the way matched entities are displayed on the map:
   - When you click an entity marker on the map, a popup will appear with some information about the entity.
   - This is a string that contains a template for the content of this popup.
   - If you don't specify this, a default template will be used that includes all available information.
-  - Available placeholders:
+  - Available placeholders (the `{}` around these are required):
     - `{type}`: The entity type.
     - `{name}`: The name of the entity.
     - `{uuid}`: The UUID of the entity.
@@ -139,7 +153,6 @@ You should put the more specific filters first, and the more general filters las
 because entities will only get caught by the first filter that matches them.\
 This is especially important if you're using custom icons and popup info templates.\
 You could also get around this by creating multiple filter-sets.
-
 
 ### Some tips and tricks
 - A full example config can be found [here](https://github.com/TechnicJelle/BlueMapFilteredEntities/blob/main/example.conf).
