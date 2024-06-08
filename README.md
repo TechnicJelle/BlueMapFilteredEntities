@@ -142,11 +142,10 @@ You could also get around this by creating multiple filter-sets.
 
 
 ### Some tips and tricks
+- A full example config can be found [here](https://github.com/TechnicJelle/BlueMapFilteredEntities/blob/main/example.conf).
 - If the filter is not valid for some reason, a warning will be printed to the console telling you what's wrong.
 - If you find yourself repeating something a lot, you can make it into a variable.
   - This is a HOCON feature, and you can read more about it [here](https://github.com/lightbend/config/blob/main/HOCON.md#substitutions).
-
-**A full example config can be found [here](https://github.com/TechnicJelle/BlueMapFilteredEntities/blob/main/example.conf)**
 
 ## Support
 To get support with this plugin, join the [BlueMap Discord server](https://bluecolo.red/map-discord)
