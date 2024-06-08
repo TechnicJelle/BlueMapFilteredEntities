@@ -19,6 +19,7 @@ When you install this plugin for the first time, it will generate a template con
 The general format of this config is very similar to BlueMap's own built-in marker configuration,
 but instead of configuring specific markers, you have to configure filters.
 
+### Filter Sets
 You can define filter sets in the `filter-sets` section:
 ```hocon
 filter-sets: {
@@ -39,6 +40,7 @@ my-filter-set: {
 ```
 You might recognise this format from BlueMap's own marker configuration.
 
+### Entity data you can filter on
 You can filter based on all kinds of entity data:
 - `type: <string>`: The entity type.
   - Any of these: https://jd.papermc.io/paper/1.20.6/org/bukkit/entity/EntityType.html
@@ -93,6 +95,7 @@ meaning that if any of the filters match, the entity will be matched.\
 _Inside_ each filter, the different conditions are combined with AND logic,
 meaning that all conditions must be met for the filter to match.
 
+### Appearance (Extra filter options)
 Per filter, there are some other options that don't affect the filtering,
 but do affect the way matched entities are displayed on the map:
 - `icon: <string>`: The icon to use for all the markers on the map that match this filter.
@@ -137,9 +140,9 @@ because entities will only get caught by the first filter that matches them.\
 This is especially important if you're using custom icons and popup info templates.\
 You could also get around this by creating multiple filter-sets.
 
-If the filter is not valid for some reason, a warning will be printed to the console telling you what's wrong.
 
-Some tips and tricks:
+### Some tips and tricks
+- If the filter is not valid for some reason, a warning will be printed to the console telling you what's wrong.
 - If you find yourself repeating something a lot, you can make it into a variable.
   - This is a HOCON feature, and you can read more about it [here](https://github.com/lightbend/config/blob/main/HOCON.md#substitutions).
 
