@@ -84,6 +84,10 @@ public class Filter {
 	private Vector2 anchor;
 
 	@Nullable
+	@Comment("Can be used to limit the distance to the camera at which the marker is shown")
+	private Double maxDistance;
+
+	@Nullable
 	@Comment("The information that should be displayed when the entity's marker is clicked on the web map")
 	private String popupInfoTemplate;
 
@@ -222,6 +226,11 @@ public class Filter {
 			popupInfoTemplate = popupInfoTemplate.strip();
 		}
 
+		if (maxDistance != null && maxDistance < 0) {
+			logger.log(Level.SEVERE, "Max distance is negative");
+			valid = false;
+		}
+
 		if (exclude != null) {
 			for (Filter filter : exclude) {
 				if (!filter.checkValidAndInit(logger, bmApi)) {
@@ -265,6 +274,10 @@ public class Filter {
 
 	public @Nullable String getPopupInfoWithTemplate() {
 		return popupInfoTemplate;
+	}
+
+	public @Nullable Double getMaxDistance() {
+		return maxDistance;
 	}
 
 	@SuppressWarnings("RedundantIfStatement")

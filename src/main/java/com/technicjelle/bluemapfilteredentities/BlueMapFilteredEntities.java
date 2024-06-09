@@ -284,6 +284,11 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 					marker.setIcon("assets/bmfe-icons/" + icon, matchedFilter.getAnchor());
 				}
 
+				Double maxDistance = matchedFilter.getMaxDistance();
+				if (maxDistance != null) {
+					marker.setMaxDistance(maxDistance);
+				}
+
 				markerSet.put("bmfe." + entity.getUniqueId(), marker);
 			}
 		}

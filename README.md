@@ -124,6 +124,9 @@ but do affect the way matched entities are displayed on the map:
 - `anchor: <vector2>`: The anchor point of the icon
   - Same as the anchor property in BlueMap's own [POI marker configuration](https://bluemap.bluecolored.de/wiki/customization/Markers.html#poi-markers).
   - **Example:** `anchor: {x:24, y:24}`
+- `max-distance: <number>`: The maximum distance from the camera to show the markers.
+  - If the camera is further away from the entity marker than this, the marker will not be shown.
+  - This is useful for performance reasons, and to prevent the map from getting cluttered.
 - `popup-info-template: <string>`: The template for the popup info of the markers.
   - When you click an entity marker on the map, a popup will appear with some information about the entity.
   - This is a string that contains a template for the content of this popup.
