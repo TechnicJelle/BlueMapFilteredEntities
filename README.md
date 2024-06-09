@@ -3,6 +3,10 @@
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapFilteredEntities/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapFilteredEntities/releases/latest)
 [![Servers using this plugin](https://img.shields.io/bstats/servers/21976?label=Servers)](https://bstats.org/plugin/bukkit/BlueMap%20Filtered%20Entities/21976)
 
+A Minecraft Paper BlueMap addon that allows you to track entities on your map, with lots of filtering options.
+
+![A screenshot of a BlueMap, with a bunch of entity heads visible on it](.github/readme_assets/demo.png)
+
 Compatible with Paper 1.13+, just like BlueMap itself.
 
 To reload this plugin, just reload BlueMap itself with `/bluemap reload`.
