@@ -11,21 +11,17 @@ import java.util.logging.Logger;
 
 @ConfigSerializable
 public class FilterSet {
-	@Nullable
 	@Comment("Label of the filter set, aka the name on the website")
-	private String label;
+	private @Nullable String label;
 
-	@Nullable
 	@Comment("Whether the filter set can be toggled on the website")
-	private Boolean toggleable;
+	private @Nullable Boolean toggleable;
 
-	@Nullable
 	@Comment("Whether the filter set is hidden by default on the website")
-	private Boolean defaultHidden;
+	private @Nullable Boolean defaultHidden;
 
-	@Nullable
 	@Comment("List of filters to apply")
-	private List<Filter> filters;
+	private @Nullable List<Filter> filters;
 
 	public boolean checkValidAndInit(Logger logger, BlueMapAPI bmApi) {
 		boolean valid = true;

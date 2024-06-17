@@ -23,77 +23,59 @@ import static com.technicjelle.bluemapfilteredentities.Constants.*;
 
 @ConfigSerializable
 public class Filter {
-	@Nullable
 	@Comment("Type of entity to filter")
-	private String type;
+	private @Nullable String type;
 
-	@Nullable
 	@Comment("Name of the entity to filter")
-	private Pattern name;
+	private @Nullable Pattern name;
 
-	@Nullable
 	@Comment("Custom name of the entity to filter")
-	private Pattern customName;
+	private @Nullable Pattern customName;
 
-	@Nullable
 	@Comment("UUID of the entity to filter")
-	private String uuid;
+	private @Nullable String uuid;
 
-	@Nullable
 	@Comment("Spawn reason of the entity to filter")
-	private String spawnReason;
+	private @Nullable String spawnReason;
 
-	@Nullable
 	@Comment("Bukkit Entity Class")
-	private String instanceOf;
+	private @Nullable String instanceOf;
 
-	@Nullable
 	@Comment("Minimum X coordinate of the entity to filter")
-	private Float minX;
+	private @Nullable Float minX;
 
-	@Nullable
 	@Comment("Maximum X coordinate of the entity to filter")
-	private Float maxX;
+	private @Nullable Float maxX;
 
-	@Nullable
 	@Comment("Minimum Z coordinate of the entity to filter")
-	private Float minZ;
+	private @Nullable Float minZ;
 
-	@Nullable
 	@Comment("Maximum Z coordinate of the entity to filter")
-	private Float maxZ;
+	private @Nullable Float maxZ;
 
-	@Nullable
 	@Comment("Minimum Y coordinate of the entity to filter")
-	private Float minY;
+	private @Nullable Float minY;
 
-	@Nullable
 	@Comment("Maximum Y coordinate of the entity to filter")
-	private Float maxY;
+	private @Nullable Float maxY;
 
-	@Nullable
 	@Comment("Scoreboard tags of the entity to filter")
-	private Set<String> scoreboardTags;
+	private @Nullable Set<String> scoreboardTags;
 
-	@Nullable
 	@Comment("Path to the icon to use for entities that were matched by this filter")
-	private String icon;
+	private @Nullable String icon;
 
-	@Nullable
 	@Comment("The icon anchor")
-	private Vector2 anchor;
+	private @Nullable Vector2 anchor;
 
-	@Nullable
 	@Comment("Can be used to limit the distance to the camera at which the marker is shown")
-	private Double maxDistance;
+	private @Nullable Double maxDistance;
 
-	@Nullable
 	@Comment("The information that should be displayed when the entity's marker is clicked on the web map")
-	private String popupInfoTemplate;
+	private @Nullable String popupInfoTemplate;
 
-	@Nullable
 	@Comment("Sub-filters to exclude entities from the filter")
-	private List<Filter> exclude;
+	private @Nullable List<Filter> exclude;
 
 	@Nullable
 	private transient EntityType entityType;

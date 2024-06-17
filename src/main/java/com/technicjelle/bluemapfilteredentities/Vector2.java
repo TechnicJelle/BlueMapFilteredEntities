@@ -8,13 +8,11 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 @ConfigSerializable
 public class Vector2 {
-	@Nullable
 	@Comment("X coordinate")
-	private Float x;
+	private @Nullable Float x;
 
-	@Nullable
 	@Comment("Y coordinate")
-	private Float y;
+	private @Nullable Float y;
 
 	public boolean checkInvalid() {
 		return x == null || y == null;
