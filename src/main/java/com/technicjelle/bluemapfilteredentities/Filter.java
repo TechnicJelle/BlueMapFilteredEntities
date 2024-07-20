@@ -249,7 +249,7 @@ public class Filter {
 
 	public @NotNull Vector2i getAnchor() {
 		if (anchor == null) {
-			return new Vector2i();
+			return Vector2i.ZERO;
 		}
 		return anchor.toVector2i();
 	}
