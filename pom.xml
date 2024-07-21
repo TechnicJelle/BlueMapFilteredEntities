@@ -6,20 +6,27 @@
 
 	<groupId>com.technicjelle</groupId>
 	<artifactId>bluemapfilteredentities</artifactId>
-	<version>0.9</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>BlueMapFilteredEntities</name>
 
 	<properties>
-		<maven.compiler.source>16</maven.compiler.source>
-		<maven.compiler.target>16</maven.compiler.target>
+		<java.version>16</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
 		<finalName>${project.name}-${project.version}</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<release>${java.version}</release>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -95,10 +102,6 @@
 			<url>https://repo.bluecolored.de/releases</url>
 		</repository>
 		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-		<repository>
 			<id>spongepowered</id>
 			<url>https://repo.spongepowered.org/maven/</url>
 		</repository>
@@ -106,9 +109,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.github.TechnicJelle</groupId>
-			<artifactId>UpdateCheckerJava</artifactId>
-			<version>v2.5</version>
+			<groupId>com.technicjelle</groupId>
+			<artifactId>UpdateChecker</artifactId>
+			<version>2.5.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -132,7 +135,7 @@
 		<dependency>
 			<groupId>com.technicjelle</groupId>
 			<artifactId>BMUtils</artifactId>
-			<version>4.2</version>
+			<version>4.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.spongepowered</groupId>
