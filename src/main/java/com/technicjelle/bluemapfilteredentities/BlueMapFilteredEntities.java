@@ -43,8 +43,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	private UpdateChecker updateChecker;
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-	//TODO: Replace String with BlueMapMap when the bmAPI is updated to include the BlueMapMap hashcode:
-	private final Map<HashedBlueMapMap, Map<String, FilterSet>> trackingMaps = new HashMap<>();
+	private final Map<BlueMapMap, Map<String, FilterSet>> trackingMaps = new HashMap<>();
 
 	@Override
 	public void onLoad() {
@@ -165,7 +164,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 						validFilterSets.put(filterSetId, filterSet);
 					}
 					if (!validFilterSets.isEmpty())
-						trackingMaps.put(new HashedBlueMapMap(map), validFilterSets);
+						trackingMaps.put(map, validFilterSets);
 				}
 			} catch (Exception e) {
 				getLogger().log(Level.SEVERE, "Failed to load filters for map: " + map.getId(), e);
@@ -186,7 +185,7 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 		CompletableFuture<Void>[] futures = new CompletableFuture[trackingMaps.size()];
 		int i = 0;
 		for (var entry : trackingMaps.entrySet()) {
-			BlueMapMap map = entry.getKey().getMap();
+			BlueMapMap map = entry.getKey();
 			Map<String, FilterSet> filterSetMap = entry.getValue();
 
 			if (filterSetMap.isEmpty()) continue;
@@ -215,11 +214,9 @@ public final class BlueMapFilteredEntities extends JavaPlugin {
 	}
 
 	private static World findBukkitWorldFromBlueMapWorld(BlueMapAPI api, BlueMapWorld targetBMWorld) {
-		//TODO: Replace this with a normal hashcode-based comparison when the bmAPI is updated
-		String targetBMWorldId = targetBMWorld.getId();
 		for (World world : Bukkit.getWorlds()) {
-			BlueMapWorld tryBMWorld = api.getWorld(world.getName()).orElse(null);
-			if (tryBMWorld != null && tryBMWorld.getId().equals(targetBMWorldId)) {
+			BlueMapWorld tryBMWorld = api.getWorld(world).orElse(null);
+			if (tryBMWorld != null && tryBMWorld.equals(targetBMWorld)) {
 				return world;
 			}
 		}
