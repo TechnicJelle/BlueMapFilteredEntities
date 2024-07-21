@@ -5,37 +5,42 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.technicjelle</groupId>
-	<artifactId>BlueMapFilteredEntities</artifactId>
+	<artifactId>bluemapfilteredentities</artifactId>
 	<version>0.9</version>
 	<packaging>jar</packaging>
 
 	<name>BlueMapFilteredEntities</name>
 
 	<properties>
-		<java.version>11</java.version>
+		<maven.compiler.source>16</maven.compiler.source>
+		<maven.compiler.target>16</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
+		<finalName>${project.name}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.4.1</version>
+				<version>3.6.0</version>
 				<configuration>
 					<relocations>
 						<relocation>
+							<pattern>com.technicjelle.BMUtils</pattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.shadow.BMUtils</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>com.technicjelle.UpdateChecker</pattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.shadow.UpdateChecker</shadedPattern>
+						</relocation>
+						<relocation>
 							<pattern>org.bstats</pattern>
-							<shadedPattern>com.technicjelle.bluemapfilteredentities.shadow.bstats</shadedPattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.shadow.bstats</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>org.spongepowered.configurate</pattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.shadow.configurate</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>
@@ -68,6 +73,13 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+				<includes>
+					<include>**/*.yml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
@@ -78,8 +90,9 @@
 			<url>https://repo.papermc.io/repository/maven-public/</url>
 		</repository>
 		<repository>
-			<id>sonatype</id>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
+			<id>bluecolored-releases</id>
+			<name>BlueColored Repository</name>
+			<url>https://repo.bluecolored.de/releases</url>
 		</repository>
 		<repository>
 			<id>jitpack.io</id>
@@ -95,7 +108,7 @@
 		<dependency>
 			<groupId>com.github.TechnicJelle</groupId>
 			<artifactId>UpdateCheckerJava</artifactId>
-			<version>v2.3</version>
+			<version>v2.5</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -105,9 +118,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.BlueMap-Minecraft</groupId>
+			<groupId>de.bluecolored.bluemap</groupId>
 			<artifactId>BlueMapAPI</artifactId>
-			<version>v2.6.1</version>
+			<version>2.7.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -117,9 +130,9 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.github.TechnicJelle</groupId>
+			<groupId>com.technicjelle</groupId>
 			<artifactId>BMUtils</artifactId>
-			<version>v3.0</version>
+			<version>4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.spongepowered</groupId>

@@ -1,6 +1,6 @@
-name: BlueMapFilteredEntities
+name: '${project.name}'
 version: '${project.version}'
-main: com.technicjelle.bluemapfilteredentities.BlueMapFilteredEntities
+main: '${project.groupId}.${project.artifactId}.${project.name}'
 api-version: '1.13'
 author: TechnicJelle
 depend:

@@ -2,7 +2,7 @@ package com.technicjelle.bluemapfilteredentities;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.gson.reflect.TypeToken;
-import com.technicjelle.BMCopy;
+import com.technicjelle.BMUtils.BMCopy;
 import com.technicjelle.UpdateChecker;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
