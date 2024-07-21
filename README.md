@@ -19,6 +19,7 @@ The configuration for this plugin uses [HOCON](https://github.com/lightbend/conf
 In the `plugins/BlueMapFilteredEntities` folder you should make a `.conf` file for each BlueMap map you want to control,
 with the map-id as the name.\
 When you install this plugin for the first time, it will generate a template config for each registered BlueMap map.
+You should delete the ones for the maps you don't want to show entities on.
 
 The general format of this config is very similar to BlueMap's own built-in marker configuration,
 but instead of configuring specific markers, you have to configure filters.
