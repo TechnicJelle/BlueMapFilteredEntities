@@ -58,7 +58,7 @@ my-filter-set: {
 You might recognise this format from BlueMap's own marker configuration.
 
 ### Filters
-A single filter contains one or multiple properties, between a pair of curly brackes: ` { } `
+A single filter contains one or multiple properties, between a pair of curly braces: ` { } `
 
 The different filters inside a filter-set are combined with OR logic,
 meaning that if any of the filters match, the entity will be matched.\
