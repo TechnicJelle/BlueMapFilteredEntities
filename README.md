@@ -67,7 +67,7 @@ meaning that all conditions must be met for the filter to match.
 
 #### Entity data you can filter on
 - `type: <string>`: The entity type.
-  - Any of these: https://jd.papermc.io/paper/1.20.6/org/bukkit/entity/EntityType.html
+  - Any of these: https://jd.papermc.io/paper/org/bukkit/entity/EntityType.html
   - This string is case-insensitive.
 - `name: <string>`: The name of the entity.
   - This is a regex pattern, so it checks if the name of the entity _contains_ this string.
@@ -88,10 +88,10 @@ meaning that all conditions must be met for the filter to match.
     This does change if you have renamed it in an anvil.
 - `uuid: <string>`: The UUID of the entity.
 - `spawn-reason: <string>`: The reason the entity was spawned.
-  - Any of these: https://jd.papermc.io/paper/1.20.6/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
+  - Any of these: https://jd.papermc.io/paper/org/bukkit/event/entity/CreatureSpawnEvent.SpawnReason.html
   - This string is case-insensitive.
 - `instance-of: <string>`: The class name of the entity.
-  - Any of these: https://jd.papermc.io/paper/1.20.6/org/bukkit/entity/package-summary.html
+  - Any of these: https://jd.papermc.io/paper/org/bukkit/entity/package-summary.html
   - This string is case-sensitive.
   - This is useful for filtering entities on "categories", like all animals, all monsters, all flying, etc.
 - `min-x: <number>`: The minimum X coordinate of the entity.
