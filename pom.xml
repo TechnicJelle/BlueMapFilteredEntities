@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.technicjelle</groupId>
@@ -77,16 +77,18 @@
 			</plugin>
 		</plugins>
 		<resources>
+			<!--First: Copy all resources-->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+			<!--Then: Copy (and overwrite) all resources that match the pattern and filter them-->
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
 					<include>**/*.yml</include>
 				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
@@ -135,7 +137,7 @@
 		<dependency>
 			<groupId>com.technicjelle</groupId>
 			<artifactId>BMUtils</artifactId>
-			<version>4.2.1</version>
+			<version>5.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.spongepowered</groupId>
